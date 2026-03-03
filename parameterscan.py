@@ -6,13 +6,14 @@ import os
 
 # Parameters
 repertoire = ''
-executable = 'engine.exe' # Change this if your executable has a different name or path, like last week
+executable = '/home/boriskiriakov/Downloads/Exercise1_student/runaways/problème/engine.exe' # Change this if your executable has a different name or path, like last week
 input_filename = 'configuration.in.example'
 
-tf = 0.0
+tf = 32
 N0 = 0.0
-g = 0.0
-d = 0.0
+g = 0.5
+d = 0.01
+
 
 alpha = 1  # 1 explicit, 0 implicit, 0.5 semi-implicit
 
@@ -35,23 +36,26 @@ print("Saving results in:", outdir)
 
 dt = tf / 2**np.arange(2, 8) #TODO: Adjust for your needs
 nsimul = len(dt)
+beta=np.sqrt(g**2+4*d)
+exp_tf=np.exp(-beta*tf)
 
 # Exact solution #TODO: Fill
-Nfp = 0. # steady state solution at t=inf
-Nf = 0.  # exact solution at tf
+Nfp = g # steady state solution at t=inf
+Nf = 2*d*(1-exp_tf)/(beta-g+(beta+g)*(exp_tf))  # exact solution at tf
 
 Nr = 0.2  # fraction of equilibrium defining characteristic time
 
 # ---- exact characteristic time ----
 t_ref = np.linspace(0, tf, 200000)
+exp_t=np.exp(-beta*t_ref)
 
 #TODO: calculate N_exact as function of time
-N_exact = 0 # exact solution as function of time
+N_exact = 2*d*(1-exp_t)/(beta-g+(beta+g)*(exp_t)) # exact solution as function of time
 
 
 ratio_exact = N_exact / Nfp
 #TODO: calculate tau_ref as the time when ratio_exact crosses Nr, using interpolation
-tau_ref = 0; 
+tau_ref = np.interp(Nr, N_exact/Nfp,t_ref)
 
 paramstr = 'dt'
 param = dt
@@ -102,11 +106,11 @@ for i in range(nsimul):
         totalsteps.append(total_steps)
 
         #TODO: calculate ratio and tau using interpolation, and store in tau_list
-        ratio = 0 # ratio as function of time
+        ratio = N/Nfp # ratio as function of time
 
         if ratio[0] <= Nr <= ratio[-1]: # Check if Nr is within the range of ratio for interpolation
             try:
-                tau = 0 #TODO: interpolate to find tau where ratio crosses Nr
+                tau = np.interp(Nr, ratio,t_ref)#TODO: interpolate to find tau where ratio crosses Nr
             except ValueError:
                 tau = np.nan
         else:
@@ -114,7 +118,7 @@ for i in range(nsimul):
 
         tau_list.append(tau)
 
-        error[i] = 0 #TODO: calculate relative error on Nf and store in error[i]
+        error[i] = np.abs(Nf-Nfp)/np.abs(Nfp) #TODO: calculate relative error on Nf and store in error[i]
 
     axs.plot(t, N, label=f"dt={param[i]:.2e}", linewidth=lw, alpha=0.7)
 
