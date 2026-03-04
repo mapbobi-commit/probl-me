@@ -96,10 +96,11 @@ private:
         // TODO : Implementer la méthode d'Euler implicite et semi_implicite (en utilisant delta_N_EE)
         Ncontrol = N; // Ncontrole est la solution de reference pour le calcul de l'erreur, elle doit etre mise a jour a chaque iteration
         // TODO : Calculer l'erreur relative entre N et Ncontrol pour le critere d'arret de la methode iterative
-        N=Nold + dt*f;
+        Ncontrol=Nold + (1-alpha)*dt*f+alpha*delta_N_EE;
+        compute_f(f);
+        N=Nold + (1-alpha)*dt*f+alpha*delta_N_EE;
         error = abs(N[0] - Ncontrol[0])/(abs(N[0])+ abs(Ncontrol[0]));
         iteration += 1;
-        compute_f(f);
       }
       if(iteration>=maxit){
         cout << "WARNING: maximum number of iterations reached, error: " << error << endl;

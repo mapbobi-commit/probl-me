@@ -1,6 +1,5 @@
-Outputs_g_0.5_d_0.01/expl_dt=8.out
-Outputs_g_0.5_d_0.01/expl_dt=4.out
-Outputs_g_0.5_d_0.01/expl_dt=2.out
-Outputs_g_0.5_d_0.01/expl_dt=1.out
+Outputs_g_0.5_d_0.01
+Outputs_g_-0.5_d_0.01
+Outputs_g_-0.2_d_0.01
 Outputs_g_0.5_d_0.01/expl_dt=0.5.out
 Outputs_g_0.5_d_0.01/expl_dt=0.25.out

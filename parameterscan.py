@@ -11,11 +11,11 @@ input_filename = 'configuration.in.example'
 
 tf = 32
 N0 = 0.0
-g = 0.5
+g = -0.2
 d = 0.01
 
 
-alpha = 0.5  # 1 explicit, 0 implicit, 0.5 semi-implicit
+alpha = 0  # 1 explicit, 0 implicit, 0.5 semi-implicit
 
 if alpha == 1:
     alphastr = "expl"
@@ -34,7 +34,7 @@ os.makedirs(outdir, exist_ok=True)
 print("Saving results in:", outdir)
 # -------------------------------------------------
 
-dt = tf / 2**np.arange(2, 8) #TODO: Adjust for your needs
+dt = tf / 2**np.arange(4,9) #TODO: Adjust for your needs
 nsimul = len(dt)
 beta=np.sqrt(g**2+4*d)
 exp_tf=np.exp(-beta*tf)
@@ -42,11 +42,11 @@ exp_tf=np.exp(-beta*tf)
 # Exact solution #TODO: Fill
 Nfp = (g+beta)/2# steady state soluti on at t=inf
 Nf = 2*d*(1-exp_tf)/(beta-g+(beta+g)*(exp_tf))  # exact solution at tf
-
+print(Nfp)
 Nr = 0.2  # fraction of equilibrium defining characteristic time
 
 # ---- exact characteristic time ----
-t_ref = np.linspace(0, tf, 200000)
+t_ref = np.linspace(0, tf, 20000)
 exp_t=np.exp(-beta*t_ref)
 
 #TODO: calculate N_exact as function of time
@@ -112,7 +112,8 @@ for i in range(nsimul):
 
         if ratio[0] <= Nr <= ratio[-1]: # Check if Nr is within the range of ratio for interpolation
             try:
-                tau = np.interp(Nr, ratio,t_ref)  #TODO: interpolate to find tau where ratio crosses Nr
+                cs = CubicSpline(ratio, t)  # Assumes ratio is sorted/monotonic increasing
+                tau = cs(Nr) #TODO: interpolate to find tau where ratio crosses Nr
             except ValueError:
                 tau = np.nan
         else:
@@ -120,7 +121,7 @@ for i in range(nsimul):
 
         tau_list.append(tau)
 
-        error[i] = np.abs(Nf-Nfp)/np.abs(Nfp) #TODO: calculate relative error on Nf and store in error[i]
+        error[i] = abs(NN-Nf)/abs(Nf) #TODO: calculate relative error on Nf and store in error[i]
 
     axs.plot(t, N, label=f"dt={param[i]:.2e}", linewidth=lw, alpha=0.7)
 
@@ -194,3 +195,4 @@ plt.ylabel("Relative error on tau")
 plt.grid(True, which="both", linestyle="--", linewidth=0.5)
 plt.tight_layout()
 plt.savefig(os.path.join(outdir, f"{figstr}_tau_error_vs_steps.png"), dpi=300)
+print(N[-1])
