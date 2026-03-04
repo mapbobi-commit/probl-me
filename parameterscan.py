@@ -15,7 +15,7 @@ g = 0.5
 d = 0.01
 
 
-alpha = 1  # 1 explicit, 0 implicit, 0.5 semi-implicit
+alpha = 0.5  # 1 explicit, 0 implicit, 0.5 semi-implicit
 
 if alpha == 1:
     alphastr = "expl"
@@ -40,7 +40,7 @@ beta=np.sqrt(g**2+4*d)
 exp_tf=np.exp(-beta*tf)
 
 # Exact solution #TODO: Fill
-Nfp = g # steady state solution at t=inf
+Nfp = (g+beta)/2# steady state soluti on at t=inf
 Nf = 2*d*(1-exp_tf)/(beta-g+(beta+g)*(exp_tf))  # exact solution at tf
 
 Nr = 0.2  # fraction of equilibrium defining characteristic time
@@ -55,7 +55,7 @@ N_exact = 2*d*(1-exp_t)/(beta-g+(beta+g)*(exp_t)) # exact solution as function o
 
 ratio_exact = N_exact / Nfp
 #TODO: calculate tau_ref as the time when ratio_exact crosses Nr, using interpolation
-tau_ref = np.interp(Nr, N_exact/Nfp,t_ref)
+tau_ref = np.interp(Nr, ratio_exact,t_ref)
 
 paramstr = 'dt'
 param = dt
@@ -106,11 +106,13 @@ for i in range(nsimul):
         totalsteps.append(total_steps)
 
         #TODO: calculate ratio and tau using interpolation, and store in tau_list
+
         ratio = N/Nfp # ratio as function of time
+        print(ratio)
 
         if ratio[0] <= Nr <= ratio[-1]: # Check if Nr is within the range of ratio for interpolation
             try:
-                tau = np.interp(Nr, ratio,t_ref)#TODO: interpolate to find tau where ratio crosses Nr
+                tau = np.interp(Nr, ratio,t_ref)  #TODO: interpolate to find tau where ratio crosses Nr
             except ValueError:
                 tau = np.nan
         else:
@@ -147,6 +149,7 @@ plt.grid(True)
 plt.tight_layout()
 plt.savefig(os.path.join(outdir, f"{figstr}_Nf_error.png"), dpi=300)
 
+print(tau_list)
 # Convergence plot
 plt.figure()
 plt.plot(dtlist, N_list, 'r+-', label="numerical")
